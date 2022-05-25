@@ -6,7 +6,7 @@ DISPLAY_HEIGHT = 1000
 DISPLAY_WIDTH = 1000
 
 HEIGHT_UNIT = DISPLAY_HEIGHT / 100
-GRAVITY = 0.1 * HEIGHT_UNIT
+GRAVITY = 0.2 * HEIGHT_UNIT
 
 
 class SceneObject:
@@ -20,11 +20,13 @@ class Bird(SceneObject):
 
     def __init__(self, surface: pg.Surface, x=DISPLAY_WIDTH * 0.1, y=DISPLAY_HEIGHT * 0.5):
         super().__init__(x, y)
+
+        self.radius = DISPLAY_WIDTH * 0.03
+
         self.score = 0
         self.velocity = 0
         self.surface = surface
         self.rect = pg.Rect(self.x, self.y, DISPLAY_WIDTH * 0.05, DISPLAY_WIDTH * 0.05)
-        self.update()
 
     def flap(self):
         print('Bird Jump!')
@@ -35,17 +37,22 @@ class Bird(SceneObject):
         self.rect.update((self.x, self.y, self.rect.width, self.rect.height))
 
     def draw(self):
-        pg.draw.circle(self.surface, (255, 0, 0), self.rect.center, radius=DISPLAY_WIDTH * 0.05)
+        pg.draw.circle(self.surface, (255, 0, 0), self.rect.center, radius=self.radius)
 
     def update(self):
         print(self.rect.center)
         self.move()
         self.draw()
-        if self.y < DISPLAY_HEIGHT + DISPLAY_WIDTH * 0.05 or self.y < 0:
+        if self.y < DISPLAY_HEIGHT - 2 * self.radius or self.y < 0:
             self.velocity -= GRAVITY
         else:
             self.velocity = 0
-            self.y = DISPLAY_HEIGHT - 2 * DISPLAY_WIDTH * 0.05
+            self.y = DISPLAY_HEIGHT - 2 * self.radius
+
+
+class Pipe(SceneObject):
+    def __init__(self, x, y):
+        super().__init__(x, y)
 
 
 def main():
