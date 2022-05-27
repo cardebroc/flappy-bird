@@ -11,7 +11,6 @@ DISPLAY_WIDTH = 1500
 HEIGHT_UNIT = DISPLAY_HEIGHT / 100
 GRAVITY = 0.1 * HEIGHT_UNIT
 
-
 global generation
 
 
@@ -72,8 +71,9 @@ class Bird:
         pg.draw.circle(surface, (255, 0, 0), self.rect.center, radius=self.radius)
 
     def get_data(self, pipes: list[Pipe]):
-        nearest_pipe = sorted(list(filter(lambda pipe: pipe.top.left - self.x > 0, pipes)), key=lambda pipe: pipe.top.left)[0]
-        return self.y, nearest_pipe.top.left, nearest_pipe.top.bottom, nearest_pipe. bottom.top
+        nearest_pipe = \
+        sorted(list(filter(lambda pipe: pipe.top.left - self.x > 0, pipes)), key=lambda pipe: pipe.top.left)[0]
+        return self.y, nearest_pipe.top.left, nearest_pipe.top.right, nearest_pipe.top.bottom, nearest_pipe.bottom.top
 
     def die(self):
         self.is_alive = False
@@ -95,7 +95,7 @@ class Bird:
 
 def run_game(genomes, _config):
     # Initialize PyGame
-    global generation
+
     pygame.init()
 
     screen = pg.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
@@ -113,6 +113,7 @@ def run_game(genomes, _config):
 
     pipes = [Pipe(surface, DISPLAY_WIDTH, DISPLAY_HEIGHT * 0.5)]
 
+    global generation
     generation += 1
     running = True
     while running:
@@ -138,29 +139,32 @@ def run_game(genomes, _config):
             if sum([1 for pip in pipes if bird.rect.colliderect(pip.top) or bird.rect.colliderect(pip.bottom)]) > 0:
                 bird.die()
 
-        # if bird.rect.collidelist([rect for pipe in pipes for rect in [pipe.top, pipe.bottom]]) > 0:
-        #     print("DEAD")
-
         for pipe in pipes:
             pipe.update()
 
         if len([bird for bird, _, _ in birds_brains_genes if bird.is_alive]) == 0:
-            total_score = sum([bird.score for bird, _, _ in birds_brains_genes])
-            for bird, net, genome in birds_brains_genes:
-                genome.fitness = bird.score / total_score
-            print('game over')
+        #     total_score = sum([bird.score for bird, _, _ in birds_brains_genes])
+        #     for bird, net, genome in birds_brains_genes:
+        #         genome.fitness = bird.score / total_score
+        #     print('game over')
             break
 
         font = pg.font.SysFont('lato', 45, bold=True)
         img = font.render(f'Generation: {str(generation)}', True, (0, 0, 255))
 
+        for bird, _, genome in birds_brains_genes:
+            if bird.is_alive:
+                genome.fitness += 0.1
+
         screen.blit(surface, (0, 0))
-        # screen.blit(img, (DISPLAY_WIDTH * 0.5, 0))
+        screen.blit(img, (DISPLAY_WIDTH * 0.5, 0))
         pygame.display.update()
         fps.tick(60)
 
 
 if __name__ == '__main__':
+    generation = 0
+
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
